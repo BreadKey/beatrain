@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:beatrain/note.dart';
 import 'package:beatrain/pattern.dart';
 import 'package:beatrain/play_screen.dart';
 import 'package:flutter/material.dart';
@@ -74,10 +77,11 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class TestPattern extends Pattern {
-  TestPattern() : super("Test", 6, 5000);
+  TestPattern() : super("Test", 6, 30000);
 
   @override
   void loadNotes(int fromMs, int toMs) {
-    // TODO: implement loadNotes
+    final index = Random().nextInt(6);
+    noteQueues[index].add(Note(index, (toMs + fromMs) ~/ 2));
   }
 }

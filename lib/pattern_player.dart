@@ -9,13 +9,18 @@ class PatternPlayer {
   static const missJudgementMs = 50;
   final Pattern pattern;
 
-  PatternPlayer(this.pattern);
-
   int _currentMs = 0;
   int _combo = 0;
   int get combo => _combo;
 
   Timer? _frameGenerator;
+
+  int _nextLoadMs = 3000;
+  int _loadIntervalMs = 3000;
+
+  PatternPlayer(this.pattern) {
+    pattern.loadNotes(0, _nextLoadMs + _loadIntervalMs);
+  }
 
   void play() {
     int lastTimestamp = DateTime.now().millisecondsSinceEpoch;
@@ -33,6 +38,8 @@ class PatternPlayer {
 
     if (_currentMs >= pattern.durationMs) {
       pause();
+    } else {
+      _loadNotes();
     }
   }
 
@@ -44,6 +51,13 @@ class PatternPlayer {
         _onMiss();
         queue.removeFirst();
       }
+    }
+  }
+
+  void _loadNotes() {
+    if (_currentMs >= _nextLoadMs) {
+      _nextLoadMs += _loadIntervalMs;
+      pattern.loadNotes(_nextLoadMs, _nextLoadMs + _loadIntervalMs);
     }
   }
 
@@ -69,6 +83,7 @@ class PatternPlayer {
   }
 
   void _onMiss() {
+    print("miss");
     _combo = 0;
   }
 
