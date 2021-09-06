@@ -85,6 +85,8 @@ class PatternPlayer extends ChangeNotifier {
 
     final diffMs = (queue.first.ms - _currentMs).abs() ~/ 2;
 
+    print(diffMs);
+
     if (diffMs <= missJudgementMs) {
       if (diffMs <= perfectJudgementMs) {
         _onPerfect();

@@ -82,7 +82,7 @@ class TestPattern extends Pattern {
 
   @override
   void loadNotes(int fromMs, int toMs) {
-    if (toMs >= 27000 || fromMs < 3000) return;
+    if (toMs >= 27000 || fromMs < 1500) return;
 
     final bag = List.generate(6, (index) => index);
     for (int ms = fromMs; ms < toMs; ms += 250) {

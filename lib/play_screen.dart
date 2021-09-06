@@ -1,3 +1,4 @@
+import 'package:beatrain/combo_board.dart';
 import 'package:beatrain/configuration.dart';
 import 'package:beatrain/note_renderer.dart';
 import 'package:beatrain/note_screen.dart';
@@ -53,13 +54,17 @@ class _PlayScreenState extends State<PlayScreen> {
       backgroundColor: Colors.transparent,
       body: Center(
           child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 500),
+        constraints: BoxConstraints(maxWidth: 80.0 * widget.pattern.keyLength),
         child: Column(children: [
           Expanded(
             child: Stack(
               fit: StackFit.expand,
               children: [
                 buildKeyListener(context),
+                Align(
+                  alignment: Alignment(0, -0.618),
+                  child: ComboBoard(patternPlayer: patternPlayer),
+                ),
                 NoteScreen(patternPlayer: patternPlayer)
               ],
             ),
@@ -69,7 +74,7 @@ class _PlayScreenState extends State<PlayScreen> {
                 patternPlayer.keyLength,
                 (index) => Expanded(
                     child: MaterialButton(
-                      focusNode: focusNode,
+                        focusNode: focusNode,
                         color: DefaultNoteRenderer
                             .kKeyColors[patternPlayer.keyLength]![index],
                         textColor: Colors.black87,
