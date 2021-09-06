@@ -19,7 +19,7 @@ class NoteScreen extends StatelessWidget {
         Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            JudgementBoard(stream: patternPlayer.judgementStream),
+            JudgementBoard(patternPlayer: patternPlayer),
             const Divider(
               color: Colors.transparent,
             ),

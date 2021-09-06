@@ -15,9 +15,10 @@ class JudgementBoard extends StatefulWidget {
     Judgement.perfect: "Perfect"
   };
 
-  final Stream<Judgement> stream;
+  final PatternPlayer patternPlayer;
 
-  const JudgementBoard({Key? key, required this.stream}) : super(key: key);
+  const JudgementBoard({Key? key, required this.patternPlayer})
+      : super(key: key);
 
   @override
   _JudgementBoardState createState() => _JudgementBoardState();
@@ -38,7 +39,7 @@ class _JudgementBoardState extends State<JudgementBoard>
     animation = Tween(begin: Offset.zero, end: Offset(0, 0.5)).animate(
         CurvedAnimation(parent: animationController, curve: Curves.ease));
 
-    subscription = widget.stream.listen((judgement) {
+    subscription = widget.patternPlayer.judgementStream.listen((judgement) {
       setState(() {
         this.judgement = judgement;
       });
@@ -62,12 +63,23 @@ class _JudgementBoardState extends State<JudgementBoard>
   Widget build(BuildContext context) {
     final style = Theme.of(context).textTheme.headline6!;
     return SlideTransition(
-      position: animation,
-      child: Text(
-        "${JudgementBoard.kJudgementText[judgement] ?? ''}",
-        style:
-            style.copyWith(color: JudgementBoard.kJudgementColors[judgement]),
-      ),
-    );
+        position: animation,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              (widget.patternPlayer.accuracy * 100).toStringAsFixed(2),
+              style: Theme.of(context)
+                  .textTheme
+                  .subtitle1
+                  ?.copyWith(color: Colors.white70),
+            ),
+            Text(
+              "${JudgementBoard.kJudgementText[judgement] ?? ''}",
+              style: style.copyWith(
+                  color: JudgementBoard.kJudgementColors[judgement]),
+            ),
+          ],
+        ));
   }
 }

@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class PlayScreen extends StatefulWidget {
-  static const kJudgementLineHeight = 20.0;
+  static const kJudgementLineHeight = 30.0;
   final Pattern pattern;
 
   const PlayScreen({Key? key, required this.pattern}) : super(key: key);
@@ -22,7 +22,7 @@ class _PlayScreenState extends State<PlayScreen> {
       (keyLength, value) => MapEntry(
           keyLength,
           value.map((keyIndex, color) =>
-              MapEntry(keyIndex, color.withOpacity(0.5)))));
+              MapEntry(keyIndex, color.withOpacity(0.25)))));
 
   late final PatternPlayer patternPlayer;
   final configuration = Configuration();
@@ -125,6 +125,8 @@ class _PlayScreenState extends State<PlayScreen> {
         patternPlayer.speedDown();
       } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
         patternPlayer.speedUp();
+      } else if (event.logicalKey == LogicalKeyboardKey.space) {
+        patternPlayer.replay();
       }
     }
   }

@@ -26,15 +26,32 @@ class PatternPlayer extends ChangeNotifier {
   int _nextLoadMs = 3000;
   int _loadIntervalMs = 3000;
 
-  double _speed = 1.0;
+  double _speed = 2.0;
   double get speed => _speed;
 
+  int _count = 0;
+  double _accuracySum = 0;
+  double _accuracy = 0;
+  double get accuracy => _accuracy;
+
   PatternPlayer(this.pattern) : keyLength = pattern.keyLength {
+    _init();
+  }
+
+  void _init() {
+    _combo = 0;
+    _currentMs = 0;
+    _nextLoadMs = 3000;
+    _loadIntervalMs = 3000;
+    _count = 0;
+    _accuracySum = 0;
+    _accuracy = 0;
     pattern.loadNotes(0, _nextLoadMs + _loadIntervalMs);
   }
 
   void play() {
     int lastTimestamp = DateTime.now().millisecondsSinceEpoch;
+    _frameGenerator?.cancel();
     _frameGenerator =
         Timer.periodic(const Duration(milliseconds: 1000 ~/ maxFps), (timer) {
       final currentTimestamp = DateTime.now().millisecondsSinceEpoch;
@@ -78,6 +95,14 @@ class PatternPlayer extends ChangeNotifier {
     _frameGenerator?.cancel();
   }
 
+  void replay() {
+    pattern.noteQueues.forEach((queue) {
+      queue.clear();
+    });
+    _init();
+    play();
+  }
+
   void enterKey(int key) {
     final queue = pattern.noteQueues[key];
 
@@ -85,14 +110,18 @@ class PatternPlayer extends ChangeNotifier {
 
     final diffMs = (queue.first.ms - _currentMs).abs() ~/ 2;
 
-    print(diffMs);
-
     if (diffMs <= missJudgementMs) {
       if (diffMs <= perfectJudgementMs) {
+        _accuracySum += 1;
         _onPerfect();
       } else {
+        _accuracySum += (1 -
+            (diffMs - perfectJudgementMs) /
+                (missJudgementMs - perfectJudgementMs));
         _onGood();
       }
+      _count++;
+      _accuracy = _accuracySum / _count;
       queue.removeAt(0);
     }
   }

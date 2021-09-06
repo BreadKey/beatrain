@@ -84,18 +84,20 @@ class TestPattern extends Pattern {
   void loadNotes(int fromMs, int toMs) {
     if (toMs >= 27000 || fromMs < 1500) return;
 
-    final bag = List.generate(6, (index) => index);
-    for (int ms = fromMs; ms < toMs; ms += 250) {
-      final length = max(1, Random().nextInt(8) - 4);
+    int index = 0;
+    for (int ms = fromMs; ms < toMs; ms += 125) {
+      final beat = index % 4;
 
-      for (int i = 0; i < length; i++) {
-        if (bag.isEmpty) {
-          bag.addAll(List.generate(6, (index) => index));
+      if (beat % 2 == 0) {
+        noteQueues[5].add(Note(5, ms));
+        if (beat == 2) {
+          noteQueues[4].add(Note(4, ms));
         }
-
-        final index = bag.removeAt(Random().nextInt(bag.length));
-        noteQueues[index].add(Note(index, ms));
+      } else if (beat == 3) {
+        noteQueues[0].add(Note(0, ms));
       }
+
+      index++;
     }
   }
 }
