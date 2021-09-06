@@ -1,10 +1,13 @@
 import 'package:beatrain/configuration.dart';
+import 'package:beatrain/note_renderer.dart';
+import 'package:beatrain/note_screen.dart';
 import 'package:beatrain/pattern.dart';
 import 'package:beatrain/pattern_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class PlayScreen extends StatefulWidget {
+  static const kJudgementLineHeight = 20.0;
   final Pattern pattern;
 
   const PlayScreen({Key? key, required this.pattern}) : super(key: key);
@@ -14,18 +17,28 @@ class PlayScreen extends StatefulWidget {
 }
 
 class _PlayScreenState extends State<PlayScreen> {
+  static final kKeyDownColors = DefaultNoteRenderer.kKeyColors.map(
+      (keyLength, value) => MapEntry(
+          keyLength,
+          value.map((keyIndex, color) =>
+              MapEntry(keyIndex, color.withOpacity(0.5)))));
+
   late final PatternPlayer patternPlayer;
+  final configuration = Configuration();
+
   late final FocusNode focusNode;
 
-  late final List<bool> pressDown;
-  final configuration = Configuration();
+  late final List<bool> pressed;
+
+  late void Function(void Function()) setKeyState;
 
   @override
   void initState() {
     super.initState();
     patternPlayer = PatternPlayer(widget.pattern)..play();
+
     focusNode = FocusNode();
-    pressDown = List.generate(widget.pattern.keyLength, (index) => false);
+    pressed = List.generate(patternPlayer.keyLength, (index) => false);
   }
 
   @override
@@ -36,42 +49,85 @@ class _PlayScreenState extends State<PlayScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-      builder: (context, contsraints) => RawKeyboardListener(
-          autofocus: true,
-          focusNode: focusNode,
-          onKey: onKey,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: List.generate(widget.pattern.keyLength * 2 + 1, (index) {
-              final keyIndex = index ~/ 2;
-              return index % 2 == 1
-                  ? Expanded(
-                      child: Material(
-                      color: pressDown[keyIndex]
-                          ? Colors.blue
-                          : Colors.transparent,
-                      child: Stack(
-                          children: List.generate(
-                              widget.pattern.noteQueues[keyIndex].length,
-                              (index) => Container(
-                                    height: 10,
-                                    width: double.infinity,
-                                    color: Colors.white,
-                                  ))),
-                    ))
-                  : const VerticalDivider();
-            }),
-          )));
+  Widget build(BuildContext context) => Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Center(
+          child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Column(children: [
+          Expanded(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                buildKeyListener(context),
+                NoteScreen(patternPlayer: patternPlayer)
+              ],
+            ),
+          ),
+          Row(
+            children: List.generate(
+                patternPlayer.keyLength,
+                (index) => Expanded(
+                    child: MaterialButton(
+                      focusNode: focusNode,
+                        color: DefaultNoteRenderer
+                            .kKeyColors[patternPlayer.keyLength]![index],
+                        textColor: Colors.black87,
+                        onPressed: () {},
+                        onHighlightChanged: (isDown) {
+                          enterKey(index, isDown);
+                        },
+                        child: Text(configuration
+                            .keySettings[patternPlayer.keyLength]![index]
+                            .keyLabel)))),
+          )
+        ]),
+      )));
+
+  Widget buildKeyListener(BuildContext context) => RawKeyboardListener(
+      focusNode: focusNode,
+      autofocus: true,
+      onKey: onKey,
+      child: StatefulBuilder(builder: (context, setKeyState) {
+        this.setKeyState = setKeyState;
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: List.generate(patternPlayer.keyLength, (keyIndex) {
+            return Expanded(
+                child: Container(
+              decoration: const BoxDecoration(
+                  border: Border.symmetric(
+                      vertical: BorderSide(color: Colors.white30, width: 1))),
+              child: Material(
+                color: pressed[keyIndex]
+                    ? kKeyDownColors[patternPlayer.keyLength]![keyIndex]
+                    : Colors.transparent,
+              ),
+            ));
+          }),
+        );
+      }));
 
   void onKey(RawKeyEvent event) {
-    final index = configuration.keySettings[widget.pattern.keyLength]!
+    final index = configuration.keySettings[patternPlayer.keyLength]!
         .indexOf(event.logicalKey);
 
     if (index != -1) {
-      setState(() {
-        pressDown[index] = event is RawKeyDownEvent;
-      });
+      enterKey(index, event is RawKeyDownEvent);
+    } else if (event is RawKeyDownEvent) {
+      if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+        patternPlayer.speedDown();
+      } else if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+        patternPlayer.speedUp();
+      }
     }
+  }
+
+  void enterKey(int index, bool isDown) {
+    setKeyState(() {
+      pressed[index] = isDown;
+      patternPlayer.enterKey(index);
+    });
   }
 }

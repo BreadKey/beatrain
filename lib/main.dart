@@ -1,9 +1,10 @@
 import 'dart:math';
 
-import 'package:beatrain/note.dart';
 import 'package:beatrain/pattern.dart';
 import 'package:beatrain/play_screen.dart';
 import 'package:flutter/material.dart';
+
+import 'note.dart';
 
 void main() {
   runApp(MyApp());
@@ -81,7 +82,20 @@ class TestPattern extends Pattern {
 
   @override
   void loadNotes(int fromMs, int toMs) {
-    final index = Random().nextInt(6);
-    noteQueues[index].add(Note(index, (toMs + fromMs) ~/ 2));
+    if (toMs >= 27000 || fromMs < 3000) return;
+
+    final bag = List.generate(6, (index) => index);
+    for (int ms = fromMs; ms < toMs; ms += 250) {
+      final length = max(1, Random().nextInt(8) - 4);
+
+      for (int i = 0; i < length; i++) {
+        if (bag.isEmpty) {
+          bag.addAll(List.generate(6, (index) => index));
+        }
+
+        final index = bag.removeAt(Random().nextInt(bag.length));
+        noteQueues[index].add(Note(index, ms));
+      }
+    }
   }
 }
