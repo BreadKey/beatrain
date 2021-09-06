@@ -1,14 +1,16 @@
-import 'package:beatrain/combo_board.dart';
+library play_screen;
+
 import 'package:beatrain/configuration.dart';
-import 'package:beatrain/note_renderer.dart';
-import 'package:beatrain/note_screen.dart';
+import 'package:beatrain/screen/note_renderer.dart';
+import 'package:beatrain/screen/play_screen/note_screen.dart';
 import 'package:beatrain/pattern.dart';
 import 'package:beatrain/pattern_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class PlayScreen extends StatefulWidget {
-  static const kJudgementLineHeight = 30.0;
+  static const kJudgementLineHeight = 50.0;
+  static const kJudgementLineThickness = 20.0;
   final Pattern pattern;
 
   const PlayScreen({Key? key, required this.pattern}) : super(key: key);
@@ -61,10 +63,6 @@ class _PlayScreenState extends State<PlayScreen> {
               fit: StackFit.expand,
               children: [
                 buildKeyListener(context),
-                Align(
-                  alignment: Alignment(0, -0.618),
-                  child: ComboBoard(patternPlayer: patternPlayer),
-                ),
                 NoteScreen(patternPlayer: patternPlayer)
               ],
             ),

@@ -1,8 +1,8 @@
-import 'package:beatrain/judgement_board.dart';
+import 'package:beatrain/screen/play_screen/judgement_board.dart';
 import 'package:beatrain/note.dart';
-import 'package:beatrain/note_renderer.dart';
+import 'package:beatrain/screen/note_renderer.dart';
 import 'package:beatrain/pattern_player.dart';
-import 'package:beatrain/play_screen.dart';
+import 'package:beatrain/screen/play_screen.dart';
 import 'package:flutter/material.dart';
 
 class NoteScreen extends StatelessWidget {
@@ -17,19 +17,18 @@ class NoteScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Stack(children: [
         Column(
-          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            JudgementBoard(patternPlayer: patternPlayer),
+            Expanded(child: JudgementBoard(patternPlayer: patternPlayer)),
             const Divider(
               color: Colors.transparent,
             ),
             Container(
               height: PlayScreen.kJudgementLineHeight,
               alignment: Alignment.topCenter,
-              child: const Divider(
-                height: 2,
-                thickness: 2,
-                color: Colors.white70,
+              child: Divider(
+                height: PlayScreen.kJudgementLineThickness,
+                thickness: PlayScreen.kJudgementLineThickness,
+                color: Colors.lightBlueAccent.withOpacity(0.5),
               ),
             )
           ],
@@ -60,6 +59,8 @@ class _NoteQueuePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    const judgementLineCenterY =
+        PlayScreen.kJudgementLineHeight - PlayScreen.kJudgementLineThickness / 2;
     final noteQueue = patternPlayer.pattern.noteQueues[keyIndex];
 
     for (Note note in noteQueue) {
@@ -68,8 +69,7 @@ class _NoteQueuePainter extends CustomPainter {
           size.height -
               ((note.ms - patternPlayer.currentMs) /
                       (3000.0 / patternPlayer.speed)) *
-                  size.height -
-              PlayScreen.kJudgementLineHeight);
+                  size.height - judgementLineCenterY);
 
       noteRenderer.render(
           patternPlayer.keyLength, keyIndex, canvas, center, size);

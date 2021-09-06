@@ -29,7 +29,7 @@ class PatternPlayer extends ChangeNotifier {
   double _speed = 2.0;
   double get speed => _speed;
 
-  int _count = 0;
+  int _hitNoteCount = 0;
   double _accuracySum = 0;
   double _accuracy = 0;
   double get accuracy => _accuracy;
@@ -43,7 +43,7 @@ class PatternPlayer extends ChangeNotifier {
     _currentMs = 0;
     _nextLoadMs = 3000;
     _loadIntervalMs = 3000;
-    _count = 0;
+    _hitNoteCount = 0;
     _accuracySum = 0;
     _accuracy = 0;
     pattern.loadNotes(0, _nextLoadMs + _loadIntervalMs);
@@ -112,16 +112,13 @@ class PatternPlayer extends ChangeNotifier {
 
     if (diffMs <= missJudgementMs) {
       if (diffMs <= perfectJudgementMs) {
-        _accuracySum += 1;
         _onPerfect();
       } else {
-        _accuracySum += (1 -
-            (diffMs - perfectJudgementMs) /
-                (missJudgementMs - perfectJudgementMs));
-        _onGood();
+        _onGood(diffMs);
       }
-      _count++;
-      _accuracy = _accuracySum / _count;
+      
+      _hitNoteCount++;
+      _accuracy = _accuracySum / _hitNoteCount;
       queue.removeAt(0);
     }
   }
@@ -131,13 +128,18 @@ class PatternPlayer extends ChangeNotifier {
     _judgementStreamController.sink.add(Judgement.miss);
   }
 
-  void _onGood() {
+  void _onGood(int diffMs) {
     _combo++;
+    _accuracySum += (1 -
+        (diffMs - perfectJudgementMs) / (missJudgementMs - perfectJudgementMs));
+
     _judgementStreamController.sink.add(Judgement.good);
   }
 
   void _onPerfect() {
     _combo++;
+    _accuracySum += 1;
+
     _judgementStreamController.sink.add(Judgement.perfect);
   }
 

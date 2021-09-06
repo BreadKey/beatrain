@@ -30,18 +30,20 @@ class _JudgementBoardState extends State<JudgementBoard>
   late final Animation<Offset> animation;
   late final StreamSubscription subscription;
   Judgement? judgement;
+  int? combo;
 
   @override
   void initState() {
     super.initState();
     animationController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 50));
-    animation = Tween(begin: Offset.zero, end: Offset(0, 0.5)).animate(
+    animation = Tween(begin: Offset.zero, end: Offset(0, 0.01)).animate(
         CurvedAnimation(parent: animationController, curve: Curves.ease));
 
     subscription = widget.patternPlayer.judgementStream.listen((judgement) {
       setState(() {
         this.judgement = judgement;
+        this.combo = widget.patternPlayer.combo;
       });
       animationController.forward(from: 0);
     });
@@ -67,6 +69,17 @@ class _JudgementBoardState extends State<JudgementBoard>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Expanded(
+                child: Align(
+              alignment: Alignment(0, -0.618),
+              child: Text(
+                "${combo == 0 || combo == null ? '' : combo}",
+                style: Theme.of(context)
+                    .textTheme
+                    .headline1
+                    ?.copyWith(color: Colors.white60),
+              ),
+            )),
             Text(
               (widget.patternPlayer.accuracy * 100).toStringAsFixed(2),
               style: Theme.of(context)

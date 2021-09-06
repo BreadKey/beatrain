@@ -1,3 +1,4 @@
+import 'package:beatrain/screen/play_screen.dart';
 import 'package:flutter/material.dart';
 
 abstract class NoteRenderer {
@@ -21,18 +22,17 @@ class DefaultNoteRenderer extends NoteRenderer {
       5: Colors.white,
     }
   };
-  static const kNoteHeight = 20.0;
 
   @override
   void render(
       int keyLength, int keyIndex, Canvas canvas, Offset center, Size size) {
-    const radius = kNoteHeight / 2 * 0.618;
+    const radius = PlayScreen.kJudgementLineThickness / 2 * 0.618;
 
     final paint = Paint()..color = kKeyColors[keyLength]![keyIndex]!;
     canvas.drawRRect(
         RRect.fromRectAndRadius(
             Rect.fromCenter(
-                center: center, width: size.width, height: kNoteHeight),
+                center: center, width: size.width, height: PlayScreen.kJudgementLineThickness),
             Radius.circular(radius / 2)),
         paint);
 

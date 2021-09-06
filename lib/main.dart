@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:beatrain/pattern.dart';
-import 'package:beatrain/play_screen.dart';
+import 'package:beatrain/screen/play_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'note.dart';
