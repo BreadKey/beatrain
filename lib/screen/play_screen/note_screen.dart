@@ -25,10 +25,14 @@ class NoteScreen extends StatelessWidget {
             Container(
               height: PlayScreen.kJudgementLineHeight,
               alignment: Alignment.topCenter,
-              child: Divider(
+              child: Container(
                 height: PlayScreen.kJudgementLineThickness,
-                thickness: PlayScreen.kJudgementLineThickness,
-                color: Colors.lightBlueAccent.withOpacity(0.5),
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [
+                  Colors.lightBlueAccent.withOpacity(0.5),
+                  Colors.lightBlueAccent.shade100.withOpacity(0.5),
+                  Colors.lightBlueAccent.withOpacity(0.5)
+                ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
               ),
             )
           ],

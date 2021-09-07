@@ -20,6 +20,9 @@ class PatternPlayer extends ChangeNotifier {
   final _judgementStreamController = StreamController<Judgement>.broadcast();
   Stream<Judgement> get judgementStream => _judgementStreamController.stream;
 
+  final _hitNoteStreamController = StreamController<Note>.broadcast();
+  Stream<Note> get hitNoteStream => _hitNoteStreamController.stream;
+
   int _currentMs = 0;
   int get currentMs => _currentMs;
   int _combo = 0;
@@ -56,7 +59,7 @@ class PatternPlayer extends ChangeNotifier {
   _LoadInfo _getNextLoadInfo({_LoadInfo? before}) {
     final from = before?.to ?? 0;
     final to = from + (60000 / pattern.bpm * 8).round();
-    final next = (from + (from - to) * (min(speed, 1) / 2)).round();
+    final next = (to - (to - from) / speed).round();
 
     return _LoadInfo(from, to, next);
   }
@@ -98,6 +101,7 @@ class PatternPlayer extends ChangeNotifier {
 
   void _loadNotes() {
     if (_currentMs >= _loadInfo.next) {
+      print("new");
       _loadInfo = _getNextLoadInfo(before: _loadInfo);
       pattern.loadNotes(_loadInfo.from, _loadInfo.to);
     }
@@ -131,7 +135,7 @@ class PatternPlayer extends ChangeNotifier {
 
       _hitNoteCount++;
       _accuracy = _accuracySum / _hitNoteCount;
-      queue.removeAt(0);
+      _hitNoteStreamController.sink.add(queue.removeAt(0));
     }
   }
 
@@ -158,6 +162,7 @@ class PatternPlayer extends ChangeNotifier {
   void dispose() {
     _frameGenerator?.cancel();
     _judgementStreamController.close();
+    _hitNoteStreamController.close();
     super.dispose();
   }
 
