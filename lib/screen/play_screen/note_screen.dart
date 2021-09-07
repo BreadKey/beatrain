@@ -53,23 +53,26 @@ class _NoteQueuePainter extends CustomPainter {
   final NoteRenderer noteRenderer;
   final PatternPlayer patternPlayer;
   final int keyIndex;
+  final double msPerBeat;
 
   _NoteQueuePainter(this.patternPlayer, this.keyIndex, this.noteRenderer)
-      : super(repaint: patternPlayer);
+      : msPerBeat = 60000 / patternPlayer.bpm,
+        super(repaint: patternPlayer);
 
   @override
   void paint(Canvas canvas, Size size) {
-    const judgementLineCenterY =
-        PlayScreen.kJudgementLineHeight - PlayScreen.kJudgementLineThickness / 2;
+    const judgementLineCenterY = PlayScreen.kJudgementLineHeight -
+        PlayScreen.kJudgementLineThickness / 2;
     final noteQueue = patternPlayer.pattern.noteQueues[keyIndex];
 
     for (Note note in noteQueue) {
       final center = Offset(
           size.width / 2,
           size.height -
-              ((note.ms - patternPlayer.currentMs) /
-                      (3000.0 / patternPlayer.speed)) *
-                  size.height - judgementLineCenterY);
+              (((note.ms - patternPlayer.currentMs) / msPerBeat) *
+                  (PlayScreen.kPixelPerBeat) *
+                  patternPlayer.speed) -
+              judgementLineCenterY);
 
       noteRenderer.render(
           patternPlayer.keyLength, keyIndex, canvas, center, size);

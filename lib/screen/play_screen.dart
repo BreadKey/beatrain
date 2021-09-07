@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 class PlayScreen extends StatefulWidget {
   static const kJudgementLineHeight = 50.0;
   static const kJudgementLineThickness = 20.0;
+  static const kPixelPerBeat = kJudgementLineThickness * 8;
   final Pattern pattern;
 
   const PlayScreen({Key? key, required this.pattern}) : super(key: key);

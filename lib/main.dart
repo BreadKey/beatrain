@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:beatrain/pattern.dart';
 import 'package:beatrain/screen/play_screen.dart';
 import 'package:flutter/material.dart';
@@ -78,14 +76,17 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class TestPattern extends Pattern {
-  TestPattern() : super("Test", 6, 30000);
+  static const _bpm = 140;
+  TestPattern() : super("Test", _bpm, 6, 30000);
+
+  final interval = (60000 / _bpm) ~/ 4;
 
   @override
   void loadNotes(int fromMs, int toMs) {
     if (toMs >= 27000 || fromMs < 1500) return;
 
     int index = 0;
-    for (int ms = fromMs; ms < toMs; ms += 125) {
+    for (int ms = fromMs; ms < toMs; ms += interval) {
       final beat = index % 4;
 
       if (beat % 2 == 0) {

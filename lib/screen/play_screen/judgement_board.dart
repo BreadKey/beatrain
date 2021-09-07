@@ -36,7 +36,7 @@ class _JudgementBoardState extends State<JudgementBoard>
   void initState() {
     super.initState();
     animationController = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 50));
+        vsync: this, duration: Duration(milliseconds: (60000 / widget.patternPlayer.bpm) ~/ 4));
     animation = Tween(begin: Offset.zero, end: Offset(0, 0.01)).animate(
         CurvedAnimation(parent: animationController, curve: Curves.ease));
 

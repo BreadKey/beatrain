@@ -11,8 +11,12 @@ class PatternPlayer extends ChangeNotifier {
   static const maxFps = 200;
   static const perfectJudgementMs = 25;
   static const missJudgementMs = 50;
+  static const minSpeed = 0.25;
+  static const maxSpeed = 5.0;
+
   final Pattern pattern;
   final int keyLength;
+  final int bpm;
   final _judgementStreamController = StreamController<Judgement>.broadcast();
   Stream<Judgement> get judgementStream => _judgementStreamController.stream;
 
@@ -23,10 +27,7 @@ class PatternPlayer extends ChangeNotifier {
 
   Timer? _frameGenerator;
 
-  int _nextLoadMs = 3000;
-  int _loadIntervalMs = 3000;
-
-  double _speed = 2.0;
+  double _speed = 1.0;
   double get speed => _speed;
 
   int _hitNoteCount = 0;
@@ -34,19 +35,30 @@ class PatternPlayer extends ChangeNotifier {
   double _accuracy = 0;
   double get accuracy => _accuracy;
 
-  PatternPlayer(this.pattern) : keyLength = pattern.keyLength {
+  late _LoadInfo _loadInfo;
+
+  PatternPlayer(this.pattern)
+      : keyLength = pattern.keyLength,
+        bpm = pattern.bpm {
     _init();
   }
 
   void _init() {
     _combo = 0;
     _currentMs = 0;
-    _nextLoadMs = 3000;
-    _loadIntervalMs = 3000;
+    _loadInfo = _getNextLoadInfo();
     _hitNoteCount = 0;
     _accuracySum = 0;
     _accuracy = 0;
-    pattern.loadNotes(0, _nextLoadMs + _loadIntervalMs);
+    pattern.loadNotes(_loadInfo.from, _loadInfo.to);
+  }
+
+  _LoadInfo _getNextLoadInfo({_LoadInfo? before}) {
+    final from = before?.to ?? 0;
+    final to = from + (60000 / pattern.bpm * 8).round();
+    final next = (from + (from - to) * (min(speed, 1) / 2)).round();
+
+    return _LoadInfo(from, to, next);
   }
 
   void play() {
@@ -85,9 +97,9 @@ class PatternPlayer extends ChangeNotifier {
   }
 
   void _loadNotes() {
-    if (_currentMs >= _nextLoadMs) {
-      _nextLoadMs += _loadIntervalMs;
-      pattern.loadNotes(_nextLoadMs, _nextLoadMs + _loadIntervalMs);
+    if (_currentMs >= _loadInfo.next) {
+      _loadInfo = _getNextLoadInfo(before: _loadInfo);
+      pattern.loadNotes(_loadInfo.from, _loadInfo.to);
     }
   }
 
@@ -116,7 +128,7 @@ class PatternPlayer extends ChangeNotifier {
       } else {
         _onGood(diffMs);
       }
-      
+
       _hitNoteCount++;
       _accuracy = _accuracySum / _hitNoteCount;
       queue.removeAt(0);
@@ -150,10 +162,18 @@ class PatternPlayer extends ChangeNotifier {
   }
 
   void speedUp() {
-    _speed = min(5.0, _speed + 0.25);
+    _speed = min(maxSpeed, _speed + 0.25);
   }
 
   void speedDown() {
-    _speed = max(0.25, _speed - 0.25);
+    _speed = max(minSpeed, _speed - 0.25);
   }
+}
+
+class _LoadInfo {
+  final int from;
+  final int to;
+  final int next;
+
+  const _LoadInfo(this.from, this.to, this.next);
 }
