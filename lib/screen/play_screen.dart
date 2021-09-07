@@ -132,8 +132,10 @@ class _PlayScreenState extends State<PlayScreen> {
 
   void enterKey(int index, bool isDown) {
     setKeyState(() {
-      pressed[index] = isDown;
-      patternPlayer.enterKey(index);
+      if (pressed[index] != isDown) {
+        patternPlayer.enterKey(index);
+        pressed[index] = isDown;
+      }
     });
   }
 }
