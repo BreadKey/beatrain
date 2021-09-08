@@ -13,15 +13,13 @@ class PatternPlayer extends ChangeNotifier {
   static const missJudgementMs = 50;
   static const minSpeed = 0.25;
   static const maxSpeed = 5.0;
+  static const hitEffectAnimationMs = 100;
 
   final Pattern pattern;
   final int keyLength;
   final int bpm;
   final _judgementStreamController = StreamController<Judgement>.broadcast();
   Stream<Judgement> get judgementStream => _judgementStreamController.stream;
-
-  final _hitNoteStreamController = StreamController<Note>.broadcast();
-  Stream<Note> get hitNoteStream => _hitNoteStreamController.stream;
 
   int _currentMs = 0;
   int get currentMs => _currentMs;
@@ -40,8 +38,12 @@ class PatternPlayer extends ChangeNotifier {
 
   late _LoadInfo _loadInfo;
 
+  final List<List<HitNote>> _hitNotesByKey;
+  Iterable<HitNote> hitNotesAt(int keyIndex) => _hitNotesByKey[keyIndex];
+
   PatternPlayer(this.pattern)
       : keyLength = pattern.keyLength,
+        _hitNotesByKey = List.generate(pattern.keyLength, (index) => []),
         bpm = pattern.bpm {
     _init();
   }
@@ -53,6 +55,11 @@ class PatternPlayer extends ChangeNotifier {
     _hitNoteCount = 0;
     _accuracySum = 0;
     _accuracy = 0;
+
+    for (List<HitNote> hitNotes in _hitNotesByKey) {
+      hitNotes.clear();
+    }
+
     pattern.loadNotes(_loadInfo.from, _loadInfo.to);
   }
 
@@ -76,6 +83,7 @@ class PatternPlayer extends ChangeNotifier {
     });
   }
 
+
   void _update(int ms) {
     _currentMs += ms;
     _checkMiss();
@@ -85,6 +93,7 @@ class PatternPlayer extends ChangeNotifier {
     } else {
       _loadNotes();
     }
+    _updateHitNotes(ms);
     notifyListeners();
   }
 
@@ -101,9 +110,17 @@ class PatternPlayer extends ChangeNotifier {
 
   void _loadNotes() {
     if (_currentMs >= _loadInfo.next) {
-      print("new");
       _loadInfo = _getNextLoadInfo(before: _loadInfo);
       pattern.loadNotes(_loadInfo.from, _loadInfo.to);
+    }
+  }
+
+  void _updateHitNotes(int ms) {
+    for (List<HitNote> hitNotes in _hitNotesByKey) {
+      hitNotes.removeWhere((hitNote) {
+        hitNote.animationMs += ms;
+        return hitNote.animationMs > hitEffectAnimationMs;
+      });
     }
   }
 
@@ -124,18 +141,20 @@ class PatternPlayer extends ChangeNotifier {
 
     if (queue.isEmpty) return;
 
-    final diffMs = (queue.first.ms - _currentMs).abs() ~/ 2;
+    final diffMs = queue.first.ms - _currentMs;
+    final diffMsForJudgement = diffMs.abs() ~/ 2;
 
-    if (diffMs <= missJudgementMs) {
-      if (diffMs <= perfectJudgementMs) {
+    if (diffMsForJudgement <= missJudgementMs) {
+      if (diffMsForJudgement <= perfectJudgementMs) {
         _onPerfect();
       } else {
-        _onGood(diffMs);
+        _onGood(diffMsForJudgement);
       }
 
       _hitNoteCount++;
       _accuracy = _accuracySum / _hitNoteCount;
-      _hitNoteStreamController.sink.add(queue.removeAt(0));
+      final note = queue.removeAt(0);
+      _hitNotesByKey[note.index].add(HitNote(note.index, diffMs));
     }
   }
 
@@ -162,7 +181,6 @@ class PatternPlayer extends ChangeNotifier {
   void dispose() {
     _frameGenerator?.cancel();
     _judgementStreamController.close();
-    _hitNoteStreamController.close();
     super.dispose();
   }
 

@@ -46,6 +46,8 @@ class NoteScreen extends StatelessWidget {
               child: CustomPaint(
                 painter:
                     _NoteQueuePainter(patternPlayer, keyIndex, noteRenderer),
+                foregroundPainter:
+                    _HitNotesPainter(patternPlayer, keyIndex, noteRenderer),
               ),
             ));
           }),
@@ -78,11 +80,37 @@ class _NoteQueuePainter extends CustomPainter {
                   patternPlayer.speed) -
               judgementLineCenterY);
 
-      noteRenderer.render(
-          patternPlayer.keyLength, keyIndex, canvas, center, size);
+      noteRenderer.renderNote(
+          patternPlayer.keyLength, note, canvas, center, size);
     }
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _HitNotesPainter extends _NoteQueuePainter {
+  _HitNotesPainter(
+      PatternPlayer patternPlayer, int keyIndex, NoteRenderer noteRenderer)
+      : super(patternPlayer, keyIndex, noteRenderer);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const judgementLineCenterY = PlayScreen.kJudgementLineHeight -
+        PlayScreen.kJudgementLineThickness / 2;
+    final hitNotes = patternPlayer.hitNotesAt(keyIndex);
+
+    for (HitNote hitNote in hitNotes) {
+      final center = Offset(
+          size.width / 2,
+          size.height -
+              ((hitNote.diffMs / msPerBeat) *
+                  (PlayScreen.kPixelPerBeat) *
+                  patternPlayer.speed) -
+              judgementLineCenterY);
+
+      noteRenderer.renderHitNote(
+          patternPlayer.keyLength, hitNote, canvas, center, size);
+    }
+  }
 }
