@@ -79,14 +79,14 @@ class TestPattern extends Pattern {
   static const _bpm = 140;
   TestPattern() : super("Test", _bpm, 6, 30000);
 
-  final interval = (60000 / _bpm) ~/ 4;
+  final interval = (60000 / _bpm) ~/ 2;
 
   @override
   void loadNotes(int fromMs, int toMs) {
     if (toMs >= 27000 || fromMs < 1500) return;
 
     int index = 0;
-    for (int ms = fromMs; ms < toMs; ms += interval) {
+    for (int ms = fromMs; ms < toMs - (interval / 4); ms += interval) {
       final beat = index % 4;
 
       if (beat % 2 == 0) {

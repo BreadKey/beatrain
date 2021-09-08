@@ -83,7 +83,6 @@ class PatternPlayer extends ChangeNotifier {
     });
   }
 
-
   void _update(int ms) {
     _currentMs += ms;
     _checkMiss();
@@ -101,7 +100,7 @@ class PatternPlayer extends ChangeNotifier {
     for (List<Note> queue in pattern.noteQueues) {
       if (queue.isEmpty) continue;
 
-      if (_currentMs - queue.first.ms > missJudgementMs) {
+      if (_currentMs - queue.first.ms > missJudgementMs * 2) {
         _onMiss();
         queue.removeAt(0);
       }
@@ -136,7 +135,7 @@ class PatternPlayer extends ChangeNotifier {
     play();
   }
 
-  void enterKey(int key) {
+  void enterKey(int key, bool isDown) {
     final queue = pattern.noteQueues[key];
 
     if (queue.isEmpty) return;
@@ -144,17 +143,19 @@ class PatternPlayer extends ChangeNotifier {
     final diffMs = queue.first.ms - _currentMs;
     final diffMsForJudgement = diffMs.abs() ~/ 2;
 
-    if (diffMsForJudgement <= missJudgementMs) {
-      if (diffMsForJudgement <= perfectJudgementMs) {
-        _onPerfect();
-      } else {
-        _onGood(diffMsForJudgement);
-      }
+    if (isDown) {
+      if (diffMsForJudgement <= missJudgementMs) {
+        if (diffMsForJudgement <= perfectJudgementMs) {
+          _onPerfect();
+        } else {
+          _onGood(diffMsForJudgement);
+        }
 
-      _hitNoteCount++;
-      _accuracy = _accuracySum / _hitNoteCount;
-      final note = queue.removeAt(0);
-      _hitNotesByKey[note.index].add(HitNote(note.index, diffMs));
+        _hitNoteCount++;
+        _accuracy = _accuracySum / _hitNoteCount;
+        final note = queue.removeAt(0);
+        _hitNotesByKey[note.index].add(HitNote(note.index, diffMs));
+      }
     }
   }
 

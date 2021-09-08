@@ -39,6 +39,7 @@ class _PlayScreenState extends State<PlayScreen> {
   @override
   void initState() {
     super.initState();
+    RawKeyboard.instance.addListener(onKey);
     patternPlayer = PatternPlayer(widget.pattern)..play();
 
     focusNode = FocusNode();
@@ -49,6 +50,7 @@ class _PlayScreenState extends State<PlayScreen> {
   void dispose() {
     patternPlayer.dispose();
     focusNode.dispose();
+    RawKeyboard.instance.removeListener(onKey);
     super.dispose();
   }
 
@@ -88,11 +90,8 @@ class _PlayScreenState extends State<PlayScreen> {
         ]),
       )));
 
-  Widget buildKeyListener(BuildContext context) => RawKeyboardListener(
-      focusNode: focusNode,
-      autofocus: true,
-      onKey: onKey,
-      child: StatefulBuilder(builder: (context, setKeyState) {
+  Widget buildKeyListener(BuildContext context) =>
+      StatefulBuilder(builder: (context, setKeyState) {
         this.setKeyState = setKeyState;
 
         return Row(
@@ -111,7 +110,7 @@ class _PlayScreenState extends State<PlayScreen> {
             ));
           }),
         );
-      }));
+      });
 
   void onKey(RawKeyEvent event) {
     final index = configuration.keySettings[patternPlayer.keyLength]!
@@ -133,7 +132,7 @@ class _PlayScreenState extends State<PlayScreen> {
   void enterKey(int index, bool isDown) {
     setKeyState(() {
       if (pressed[index] != isDown) {
-        patternPlayer.enterKey(index);
+        patternPlayer.enterKey(index, isDown);
         pressed[index] = isDown;
       }
     });

@@ -51,6 +51,6 @@ class DefaultNoteRenderer extends NoteRenderer {
         hitNote.animationMs / PatternPlayer.hitEffectAnimationMs;
 
     final paint = Paint()..color = Colors.red.withOpacity(1 - animationRatio);
-    canvas.drawCircle(center, pointerRadius * (1 + animationRatio), paint);
+    canvas.drawCircle(center, pointerRadius * (animationRatio * 6), paint);
   }
 }
