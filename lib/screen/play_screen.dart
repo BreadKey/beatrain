@@ -56,7 +56,6 @@ class _PlayScreenState extends State<PlayScreen> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-      backgroundColor: Colors.transparent,
       body: Center(
           child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: 80.0 * widget.pattern.keyLength),
