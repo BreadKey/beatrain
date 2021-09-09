@@ -1,5 +1,4 @@
 import 'package:beatrain/screen/home.dart';
-import 'package:beatrain/screen/play_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {

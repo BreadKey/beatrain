@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:beatrain/note.dart';
 import 'package:beatrain/pattern.dart';
+import 'package:beatrain/speed_manager.dart';
 import 'package:flutter/material.dart';
 
 enum Judgement { miss, good, perfect }
@@ -11,8 +11,6 @@ class PatternPlayer extends ChangeNotifier {
   static const maxFps = 200;
   static const perfectJudgementMs = 25;
   static const missJudgementMs = 50;
-  static const minSpeed = 0.25;
-  static const maxSpeed = 5.0;
   static const hitEffectAnimationMs = 100;
 
   final Pattern pattern;
@@ -27,9 +25,6 @@ class PatternPlayer extends ChangeNotifier {
   int get combo => _combo;
 
   Timer? _frameGenerator;
-
-  double _speed = 1.0;
-  double get speed => _speed;
 
   int _hitNoteCount = 0;
   double _accuracySum = 0;
@@ -60,13 +55,19 @@ class PatternPlayer extends ChangeNotifier {
       hitNotes.clear();
     }
 
+    pattern.noteQueues.forEach((queue) {
+      queue.clear();
+    });
+
     pattern.loadNotes(_loadInfo.from, _loadInfo.to);
   }
 
   _LoadInfo _getNextLoadInfo({_LoadInfo? before}) {
     final from = before?.to ?? 0;
     final to = from + (60000 / pattern.bpm * 8).round();
-    final next = (to - (to - from) / speed).round();
+    final next =
+        (to - (to - from) / SpeedManager.instance.cachedSpeedOf(pattern))
+            .round();
 
     return _LoadInfo(from, to, next);
   }
@@ -100,7 +101,7 @@ class PatternPlayer extends ChangeNotifier {
     for (List<Note> queue in pattern.noteQueues) {
       if (queue.isEmpty) continue;
 
-      if (_currentMs - queue.first.ms > missJudgementMs * 2) {
+      if (_currentMs - queue.first.ms > missJudgementMs) {
         _onMiss();
         queue.removeAt(0);
       }
@@ -128,9 +129,6 @@ class PatternPlayer extends ChangeNotifier {
   }
 
   void replay() {
-    pattern.noteQueues.forEach((queue) {
-      queue.clear();
-    });
     _init();
     play();
   }
@@ -183,14 +181,6 @@ class PatternPlayer extends ChangeNotifier {
     _frameGenerator?.cancel();
     _judgementStreamController.close();
     super.dispose();
-  }
-
-  void speedUp() {
-    _speed = min(maxSpeed, _speed + 0.25);
-  }
-
-  void speedDown() {
-    _speed = max(minSpeed, _speed - 0.25);
   }
 }
 

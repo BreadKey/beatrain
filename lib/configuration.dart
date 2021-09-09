@@ -1,10 +1,8 @@
 import 'package:flutter/services.dart';
 
 class Configuration {
-  static final _instance = Configuration._();
+  static final instance = Configuration._();
   Configuration._();
-
-  factory Configuration() => _instance;
 
   final keySettings = {
     4: [

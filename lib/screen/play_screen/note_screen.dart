@@ -3,6 +3,7 @@ import 'package:beatrain/note.dart';
 import 'package:beatrain/screen/note_renderer.dart';
 import 'package:beatrain/pattern_player.dart';
 import 'package:beatrain/screen/play_screen.dart';
+import 'package:beatrain/speed_manager.dart';
 import 'package:flutter/material.dart';
 
 class NoteScreen extends StatelessWidget {
@@ -71,13 +72,15 @@ class _NoteQueuePainter extends CustomPainter {
         PlayScreen.kJudgementLineThickness / 2;
     final noteQueue = patternPlayer.pattern.noteQueues[keyIndex];
 
+    final speed = SpeedManager.instance.cachedSpeedOf(patternPlayer.pattern);
+
     for (Note note in noteQueue) {
       final center = Offset(
           size.width / 2,
           size.height -
               (((note.ms - patternPlayer.currentMs) / msPerBeat) *
                   (PlayScreen.kPixelPerBeat) *
-                  patternPlayer.speed) -
+                  speed) -
               judgementLineCenterY);
 
       noteRenderer.renderNote(
@@ -100,13 +103,15 @@ class _HitNotesPainter extends _NoteQueuePainter {
         PlayScreen.kJudgementLineThickness / 2;
     final hitNotes = patternPlayer.hitNotesAt(keyIndex);
 
+    final speed = SpeedManager.instance.cachedSpeedOf(patternPlayer.pattern);
+
     for (HitNote hitNote in hitNotes) {
       final center = Offset(
           size.width / 2,
           size.height -
               ((hitNote.diffMs / msPerBeat) *
                   (PlayScreen.kPixelPerBeat) *
-                  patternPlayer.speed) -
+                  speed) -
               judgementLineCenterY);
 
       noteRenderer.renderHitNote(
