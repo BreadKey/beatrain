@@ -44,7 +44,7 @@ class _HomeState extends State<Home> {
             autofocus: true,
             onKey: (event) {
               if (event is RawKeyDownEvent &&
-                  event.logicalKey == LogicalKeyboardKey.space) {
+                  event.logicalKey == LogicalKeyboardKey.enter) {
                 play();
               }
             },
