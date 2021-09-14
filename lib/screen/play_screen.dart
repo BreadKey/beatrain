@@ -151,6 +151,7 @@ class _PlayScreenState extends State<PlayScreen> {
       if (event.logicalKey == LogicalKeyboardKey.space) {
         patternPlayer.replay();
       } else if (event.logicalKey == LogicalKeyboardKey.escape) {
+        RawKeyboard.instance.removeListener(onKey);
         Navigator.of(context).pop();
       }
     }

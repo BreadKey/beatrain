@@ -145,7 +145,7 @@ class _HomeState extends State<Home> {
 
 class TestPattern extends Pattern {
   static const _bpm = 140;
-  TestPattern() : super("Test", _bpm, 6, 11, 30000);
+  TestPattern() : super("Oblivion ~Rockin' Night Style~", _bpm, 6, 11, 30000);
 
   final interval = (60000 / _bpm) ~/ 2;
 
@@ -157,13 +157,18 @@ class TestPattern extends Pattern {
     for (int ms = fromMs; ms < toMs - (interval / 4); ms += interval) {
       final beat = index % 4;
 
-      if (beat % 2 == 0) {
-        noteQueues[5].add(Note(5, ms));
-        if (beat == 2) {
+      switch (beat) {
+        case 1:
+        case 3:
+          noteQueues[0].add(Note(0, ms));
+          break;
+        case 2:
           noteQueues[4].add(Note(4, ms));
-        }
-      } else if (beat == 3) {
-        noteQueues[0].add(Note(0, ms));
+          continue even;
+        even:
+        case 0:
+          noteQueues[5].add(Note(5, ms));
+          break;
       }
 
       index++;
