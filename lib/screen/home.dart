@@ -147,7 +147,7 @@ class TestPattern extends Pattern {
   static const _bpm = 140;
   TestPattern() : super("Oblivion ~Rockin' Night Style~", _bpm, 6, 11, 30000);
 
-  final interval = (60000 / _bpm) ~/ 2;
+  final interval = (60000 / _bpm) ~/ 4;
 
   @override
   void loadNotes(int fromMs, int toMs) {
